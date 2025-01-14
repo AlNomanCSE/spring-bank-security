@@ -16,13 +16,12 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
-@Profile("!prod")
-public class ProjectSecurityConfig {
-
+@Profile("prod")
+public class ProjectProdSecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
-                .requiresChannel((r) -> r.anyRequest().requiresInsecure()) //not HTTPS
+                .requiresChannel((r) -> r.anyRequest().requiresSecure()) //handle Only HTTPS requests
                 .csrf(crs -> crs.disable())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount", "/myCards", "/myBalance", "/myLoans").authenticated() //for all those route authentication needed
