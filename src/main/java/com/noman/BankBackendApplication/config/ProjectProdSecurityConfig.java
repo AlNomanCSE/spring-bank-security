@@ -1,6 +1,7 @@
 package com.noman.BankBackendApplication.config;
 
 import com.noman.BankBackendApplication.exceptionhandling.CustomBasicAuthenticationEntryPoint;
+import com.noman.BankBackendApplication.exceptionhandling.CustomeAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,20 +22,27 @@ public class ProjectProdSecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
+                .sessionManagement(smc -> smc
+                        .invalidSessionUrl("/invalidSession")
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(true))//
                 .requiresChannel((r) -> r.anyRequest().requiresSecure()) //handle Only HTTPS requests
                 .csrf(crs -> crs.disable())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount", "/myCards", "/myBalance", "/myLoans").authenticated() //for all those route authentication needed
-                        .requestMatchers("/notices", "/contact", "/error", "/register").permitAll());  //no authentication needed
+                        .requestMatchers("/notices", "/contact", "/error", "/register", "/invalidSession").permitAll());  //no authentication needed
         http.formLogin(withDefaults());
-        http.httpBasic(hbc->hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
+        http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
+        http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomeAccessDeniedHandler()));
         return http.build();
     }
+
 
 //    @Bean
 //    public UserDetailsService userDetailsService(DataSource dataSource) {
 //        return new JdbcUserDetailsManager(dataSource);
 //    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
