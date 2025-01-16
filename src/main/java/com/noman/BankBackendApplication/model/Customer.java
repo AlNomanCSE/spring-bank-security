@@ -1,26 +1,37 @@
 package com.noman.BankBackendApplication.model;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Date;
+
 @Entity
 @Getter @Setter
-//@Table(name = "customer")---if the class name and the table name is different. For example,
-// if the class name is "CustomerEntity" but the table name in the database is "customer", then we should use @Table(name = "customer").
 public class Customer {
+
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "customer_id")
     private long id;
 
-    @Column(name = "email")
+    private String name;
+
     private String email;
 
-    @Column(name = "pwd")
+    @Column(name = "mobile_number")
+    private String mobileNumber;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String pwd;
 
-    @Column(name = "role")
     private String role;
+
+    @Column(name = "create_dt")
+    @JsonIgnore
+    private Date createDt;
 
 }
