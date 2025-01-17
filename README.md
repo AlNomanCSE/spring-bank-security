@@ -36,7 +36,6 @@ A secure banking application backend built with Spring Boot and Spring Security,
 ## Configuration
 
 ### Project Dependencies
-```
 <!-- Core Dependencies -->
 spring-boot-starter-security
 spring-boot-starter-web
@@ -78,6 +77,29 @@ com.noman.BankBackendApplication
 │   └── NoticesController.java
 └── BankBackendApplication.java
 ```
+
+## Package Overview for Bank Backend Application
+
+1. **config**:
+   - Contains configuration classes for setting up security, application properties, and other configurations necessary for the application to run.
+
+2. **controller**:
+   - Houses the REST controllers that handle incoming HTTP requests and return responses. This includes endpoints for customer registration, account management, loans, and more.
+
+3. **events**:
+   - Likely contains classes related to event handling within the application, such as publishing and listening to application events.
+
+4. **exceptionhandling**:
+   - Contains classes for handling exceptions throughout the application, providing a centralized way to manage errors and return appropriate responses to clients.
+
+5. **filter**:
+   - This package likely includes filters that can intercept requests and responses, allowing for functionalities like logging, authentication, or modifying requests.
+
+6. **model**:
+   - Contains the entity classes that represent the data model of the application, such as Loans, Contact, Notice, etc. These classes are typically annotated with JPA annotations to map them to database tables.
+
+7. **repository**:
+   - Houses the repository interfaces that provide methods for data access, typically extending Spring Data JPA's JpaRepository or similar interfaces for CRUD operations.
 
 ## Getting Started
 
@@ -123,6 +145,10 @@ mvn spring-boot:run
 - `/myAccount` - Get account details
 - `/myCards` - Get cards information
 - `/myBalance` - Check balance
+### Summary
+This README file provides a comprehensive overview of your Bank Backend Application, including its features, technologies, configuration, package structure, and instructions for getting started. 
+
+If you need any further adjustments or additional sections, just let me know!
 - `/myLoans` - Get loans information
 
 ### Public Endpoints

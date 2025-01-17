@@ -12,7 +12,7 @@ import java.sql.Date;
 @Entity
 @Getter @Setter
 @Table(name = "contact_messages")
-public class Contacts {
+public class Contact {
     @Id
     @Column(name = "contact_id")
     private String contactId;
