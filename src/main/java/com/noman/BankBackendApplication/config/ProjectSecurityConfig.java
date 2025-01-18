@@ -3,6 +3,8 @@ package com.noman.BankBackendApplication.config;
 import com.noman.BankBackendApplication.exceptionhandling.CustomBasicAuthenticationEntryPoint;
 import com.noman.BankBackendApplication.exceptionhandling.CustomeAccessDeniedHandler;
 import com.noman.BankBackendApplication.filter.CsrfCookieFilter;
+import com.noman.BankBackendApplication.filter.JWTTokenGeneratorFilter;
+import com.noman.BankBackendApplication.filter.JWTTokenValidatorFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +23,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -34,8 +37,7 @@ public class ProjectSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
         http
-                .securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
-                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(corsConfig -> corsConfig.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -44,6 +46,7 @@ public class ProjectSecurityConfig {
                         corsfig.setAllowedMethods(Collections.singletonList("*"));
                         corsfig.setAllowCredentials(true);
                         corsfig.setAllowedHeaders(Collections.singletonList("*"));
+                        corsfig.setExposedHeaders(Arrays.asList("Authorization"));
                         corsfig.setMaxAge(3600L);
                         return corsfig;
                     }
@@ -54,16 +57,18 @@ public class ProjectSecurityConfig {
                         .csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
 //                        .requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT") //for all those route authentication needed
 //                        .requestMatchers("/myCards").hasAuthority("VIEWCARDS") //for all those route authentication needed
 //                        .requestMatchers("/myBalance").hasAuthority("VIEWBALANCE") //for all those route authentication needed
 //                        .requestMatchers( "/myLoans").hasAuthority("VIEWLOANS") //for all those route authentication needed
-                     .requestMatchers("/myAccount").hasRole("USER") //for all those route authentication needed
-                     .requestMatchers("/myCards").hasRole("USER") //for all those route authentication needed
-                       .requestMatchers("/myBalance").hasRole("USER") //for all those route authentication needed
-                       .requestMatchers( "/myLoans").hasRole("ADMIN") //for all those route authentication needed
-                      .requestMatchers( "/user").authenticated() //for all those route authentication needed
+                        .requestMatchers("/myAccount").hasRole("USER") //for all those route authentication needed
+                        .requestMatchers("/myCards").hasRole("USER") //for all those route authentication needed
+                        .requestMatchers("/myBalance").hasRole("USER") //for all those route authentication needed
+                        .requestMatchers( "/myLoans").hasRole("ADMIN") //for all those route authentication needed
+                        .requestMatchers( "/user").authenticated() //for all those route authentication needed
                         .requestMatchers("/notices", "/contact", "/error", "/register", "/invalidSession").permitAll());  //no authentication needed
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
@@ -71,10 +76,6 @@ public class ProjectSecurityConfig {
         return http.build();
     }
 
-//    @Bean
-//    public UserDetailsService userDetailsService(DataSource dataSource) {
-//        return new JdbcUserDetailsManager(dataSource);
-//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

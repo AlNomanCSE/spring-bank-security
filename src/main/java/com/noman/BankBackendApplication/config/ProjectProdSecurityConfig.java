@@ -3,6 +3,8 @@ package com.noman.BankBackendApplication.config;
 import com.noman.BankBackendApplication.exceptionhandling.CustomBasicAuthenticationEntryPoint;
 import com.noman.BankBackendApplication.exceptionhandling.CustomeAccessDeniedHandler;
 import com.noman.BankBackendApplication.filter.CsrfCookieFilter;
+import com.noman.BankBackendApplication.filter.JWTTokenGeneratorFilter;
+import com.noman.BankBackendApplication.filter.JWTTokenValidatorFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +24,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -34,8 +37,7 @@ public class ProjectProdSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, RestTemplateBuilder restTemplateBuilder) throws Exception {
         CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
         http
-                .securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
-                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(corsConfig -> corsConfig.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -44,6 +46,7 @@ public class ProjectProdSecurityConfig {
                         corsfig.setAllowedMethods(Collections.singletonList("*"));
                         corsfig.setAllowCredentials(true);
                         corsfig.setAllowedHeaders(Collections.singletonList("*"));
+                        corsfig.setExposedHeaders(Arrays.asList("Authorization"));
                         corsfig.setMaxAge(3600L);
                         return corsfig;
                     }
@@ -54,6 +57,8 @@ public class ProjectProdSecurityConfig {
                         .csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .requiresChannel(rcc-> rcc.anyRequest().requiresInsecure())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT") //for all those route authentication needed
