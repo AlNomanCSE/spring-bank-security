@@ -26,7 +26,7 @@ import java.util.Collections;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @Profile("!prod")
 public class ProjectSecurityConfig {
 
