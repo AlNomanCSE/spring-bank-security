@@ -21,33 +21,29 @@ import java.util.stream.Collectors;
 
 public class JWTTokenGeneratorFilter extends OncePerRequestFilter {
 
-
     /**
-     * Same contract as for {@code doFilter}, but guaranteed to be
-     * just invoked once per request within a single request thread.
-     * See {@link #shouldNotFilterAsyncDispatch()} for details.
-     * <p>Provides HttpServletRequest and HttpServletResponse arguments instead of the
-     * default ServletRequest and ServletResponse ones.
-     *
      * @param request
      * @param response
      * @param filterChain
+     * @throws ServletException
+     * @throws IOException
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (null != authentication) {
-            Environment environment = getEnvironment();
-            if(null!= environment){
-                String secret = environment.getProperty(ApplicationConstance.JWT_SECRET, ApplicationConstance.JWT_SECRET_DEFAULT_VALUE);
+            Environment env = getEnvironment();
+            if (null != env) {
+                String secret = env.getProperty(ApplicationConstance.JWT_SECRET,
+                        ApplicationConstance.JWT_SECRET_DEFAULT_VALUE);
                 SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-                String jwt = Jwts.builder().issuer("N Bank").subject("JWT Token")
+                String jwt = Jwts.builder().issuer("Eazy Bank").subject("JWT Token")
                         .claim("username", authentication.getName())
                         .claim("authorities", authentication.getAuthorities().stream().map(
-                                        GrantedAuthority::getAuthority)
-                                .collect(Collectors.joining(",")))
+                                GrantedAuthority::getAuthority).collect(Collectors.joining(",")))
                         .issuedAt(new Date())
-                        .expiration(new Date(new Date().getTime() + 1000 * 60 * 60 * 24))
+                        .expiration(new Date((new Date()).getTime() + 30000000))
                         .signWith(secretKey).compact();
                 response.setHeader(ApplicationConstance.JWT_HEADER, jwt);
             }

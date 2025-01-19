@@ -64,7 +64,7 @@ public class ProjectProdSecurityConfig {
                         .requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT") //for all those route authentication needed
                         .requestMatchers("/myCards").hasAuthority("VIEWCARDS") //for all those route authentication needed
                         .requestMatchers("/myBalance").hasAuthority("VIEWBALANCE") //for all those route authentication needed
-                        .requestMatchers( "/myLoans").hasAuthority("VIEWLOANS") //for all those route authentication needed
+                        .requestMatchers( "/myLoans").authenticated()//for all those route authentication needed
                         .requestMatchers( "/user").authenticated() //for all those route authentication needed
                         .requestMatchers("/notices", "/contact", "/error", "/register", "/invalidSession").permitAll());  //no authentication needed
         http.formLogin(withDefaults());

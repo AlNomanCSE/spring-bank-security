@@ -22,42 +22,44 @@ import java.nio.charset.StandardCharsets;
 
 public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     /**
-     * Same contract as for {@code doFilter}, but guaranteed to be
-     * just invoked once per request within a single request thread.
-     * See {@link #shouldNotFilterAsyncDispatch()} for details.
-     * <p>Provides HttpServletRequest and HttpServletResponse arguments instead of the
-     * default ServletRequest and ServletResponse ones.
-     *
      * @param request
      * @param response
      * @param filterChain
+     * @throws ServletException
+     * @throws IOException
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String jwt = request.getHeader(ApplicationConstance.JWT_HEADER);
-        if (null != jwt) {
+        if(null != jwt) {
             try {
-                Environment environment = getEnvironment();
-                if (null != environment) {
-                    String secret = environment.getProperty(ApplicationConstance.JWT_SECRET, ApplicationConstance.JWT_SECRET_DEFAULT_VALUE);
+                Environment env = getEnvironment();
+                if (null != env) {
+                    String secret = env.getProperty(ApplicationConstance.JWT_SECRET,
+                            ApplicationConstance.JWT_SECRET_DEFAULT_VALUE);
                     SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-                    if (null != secretKey) {
-                        Claims payload = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(jwt).getPayload();
-                        String username = String.valueOf(payload.get("username"));
-                        String authorities = String.valueOf(payload.get("authorities"));
-                        Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+                    if(null !=secretKey) {
+                        Claims claims = Jwts.parser().verifyWith(secretKey)
+                                .build().parseSignedClaims(jwt).getPayload();
+                        String username = String.valueOf(claims.get("username"));
+                        String authorities = String.valueOf(claims.get("authorities"));
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(username, null,
+                                AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }
-            } catch (Exception e) {
-                throw new BadCredentialsException("Invalid Token received");
+
+            } catch (Exception exception) {
+                throw new BadCredentialsException("Invalid Token received!");
             }
         }
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(request,response);
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return request.getServletPath().equals("/user");
     }
+
 }

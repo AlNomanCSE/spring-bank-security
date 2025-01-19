@@ -9,10 +9,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -29,7 +32,7 @@ import java.util.Collections;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 @Profile("!prod")
 public class ProjectSecurityConfig {
 
@@ -53,7 +56,7 @@ public class ProjectSecurityConfig {
                 }))
                 .requiresChannel((r) -> r.anyRequest().requiresInsecure()) //not HTTPS
                 .csrf(csrfConfig -> csrfConfig
-                        .ignoringRequestMatchers("/contact","/register")
+                        .ignoringRequestMatchers("/contact", "/register","/apiLogin")
                         .csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
@@ -64,12 +67,12 @@ public class ProjectSecurityConfig {
 //                        .requestMatchers("/myCards").hasAuthority("VIEWCARDS") //for all those route authentication needed
 //                        .requestMatchers("/myBalance").hasAuthority("VIEWBALANCE") //for all those route authentication needed
 //                        .requestMatchers( "/myLoans").hasAuthority("VIEWLOANS") //for all those route authentication needed
-                        .requestMatchers("/myAccount").hasRole("USER") //for all those route authentication needed
-                        .requestMatchers("/myCards").hasRole("USER") //for all those route authentication needed
-                        .requestMatchers("/myBalance").hasRole("USER") //for all those route authentication needed
-                        .requestMatchers( "/myLoans").hasRole("ADMIN") //for all those route authentication needed
-                        .requestMatchers( "/user").authenticated() //for all those route authentication needed
-                        .requestMatchers("/notices", "/contact", "/error", "/register", "/invalidSession").permitAll());  //no authentication needed
+                        .requestMatchers("/myAccount").hasAnyRole("USER", "ADMIN") //for all those route authentication needed
+                        .requestMatchers("/myCards").hasAnyRole("USER", "ADMIN") //for all those route authentication needed
+                        .requestMatchers("/myBalance").hasAnyRole("USER", "ADMIN") //for all those route authentication needed
+                        .requestMatchers("/myLoans").authenticated() //for all those route authentication needed
+                        .requestMatchers("/user").authenticated() //for all those route authentication needed
+                        .requestMatchers("/notices", "/contact", "/error", "/register", "/invalidSession","/apiLogin").permitAll());  //no authentication needed
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomeAccessDeniedHandler()));
@@ -85,5 +88,13 @@ public class ProjectSecurityConfig {
     @Bean
     public CompromisedPasswordChecker compromisedPasswordChecker() {
         return new HaveIBeenPwnedRestApiPasswordChecker();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        BankUsernamePwdAuthenticationProvider authenticationProvider = new BankUsernamePwdAuthenticationProvider(userDetailsService, passwordEncoder);
+        ProviderManager providerManager = new ProviderManager(authenticationProvider);
+        providerManager.setEraseCredentialsAfterAuthentication(false);
+        return providerManager;
     }
 }
