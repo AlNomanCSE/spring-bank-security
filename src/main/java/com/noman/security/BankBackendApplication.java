@@ -1,13 +1,13 @@
-package com.noman.springsecurity;
+package com.noman.security;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NBankBackendApplication {
+public class BankBackendApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NBankBackendApplication.class, args);
+		SpringApplication.run(BankBackendApplication.class, args);
 	}
 
 }

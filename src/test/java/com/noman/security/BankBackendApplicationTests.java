@@ -1,10 +1,10 @@
-package com.noman.springsecurity;
+package com.noman.security;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class NBankBackendApplicationTests {
+class BankBackendApplicationTests {
 
 	@Test
 	void contextLoads() {
