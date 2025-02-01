@@ -21,8 +21,8 @@ public class ProjectConfiguration {
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/myAccount","/myBalance","/myLoans","/myCards").authenticated()
-                .requestMatchers("/notices","/contact","/error").permitAll()
+                .requestMatchers("/myAccount", "/myBalance", "/myLoans", "/myCards").authenticated()
+                .requestMatchers("/notices", "/contact", "/error").permitAll()
         );
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
@@ -33,9 +33,12 @@ public class ProjectConfiguration {
     public UserDetailsService userDetailsService() {
         UserDetails user = User.withUsername("noman").password("{noop}n13om13@n14").authorities("read").build();
         //same password
-        UserDetails admin = User.withUsername("admin").password("{bcrypt}$2a$12$hpddyMwUU9hMSNoVuyWw7OsqaPSDQxf7ZYN4EN6dxo7YBEOSMT0/C").authorities("admin").build();
+        UserDetails admin = User.withUsername("admin")
+                .password("{bcrypt}$2a$12$hpddyMwUU9hMSNoVuyWw7OsqaPSDQxf7ZYN4EN6dxo7YBEOSMT0/C")
+                .authorities("admin").build();
         return new InMemoryUserDetailsManager(user, admin);
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
