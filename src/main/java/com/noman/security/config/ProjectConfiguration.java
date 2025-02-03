@@ -19,9 +19,11 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class ProjectConfiguration {
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((requests) -> requests
+        http
+                .csrf(csrfConfig->csrfConfig.disable())
+                .authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/myAccount", "/myBalance", "/myLoans", "/myCards").authenticated()
-                .requestMatchers("/notices", "/contact", "/error").permitAll()
+                .requestMatchers("/notices", "/contact","/register", "/error").permitAll()
         );
         http.formLogin(withDefaults());
         http.httpBasic(withDefaults());
