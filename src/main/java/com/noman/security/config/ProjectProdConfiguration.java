@@ -16,8 +16,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
-@Profile("!prod")
-public class ProjectConfiguration {
+@Profile("prod")
+public class ProjectProdConfiguration {
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http

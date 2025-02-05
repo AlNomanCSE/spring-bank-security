@@ -15,11 +15,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class BankUserDetailsService implements UserDetailsService {
-    /**
-     * @param username the username identifying the user whose data is required.
-     * @return
-     * @throws UsernameNotFoundException
-     */
 
     private final CustomerRepository customerRepository;
     @Override
