@@ -1,6 +1,7 @@
 package com.noman.security.config;
 
 
+import com.noman.security.exceptionhandling.CustomBasicAccessDeniedEntryPoint;
 import com.noman.security.exceptionhandling.CustomBasicAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,7 @@ public class ProjectConfiguration {
                         .requestMatchers("/notices", "/contact", "/error", "/register").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc->hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
+        http.exceptionHandling(ehc->ehc.accessDeniedHandler(new CustomBasicAccessDeniedEntryPoint()));
         return http.build();
     }
 
