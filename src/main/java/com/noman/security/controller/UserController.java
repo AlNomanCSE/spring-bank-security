@@ -5,10 +5,15 @@ import com.noman.security.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.sql.Date;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,19 +23,29 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Customer customer){
-        try{
-            String encode = passwordEncoder.encode(customer.getPwd());
-            customer.setPwd(encode);
-            Customer saved = customerRepository.save(customer);
+        try {
+            String hashPwd = passwordEncoder.encode(customer.getPwd());
+            customer.setPwd(hashPwd);
+            customer.setCreateDt(new Date(System.currentTimeMillis()));
+            Customer savedCustomer = customerRepository.save(customer);
 
-            if(saved != null){
-                return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+            if (savedCustomer.getId() > 0) {
+                return ResponseEntity.status(HttpStatus.CREATED).
+                        body("Given user details are successfully registered");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).
+                        body("User registration failed");
             }
-            else{
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>("An Exception Occurred"+e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).
+                    body("An exception occurred: " + ex.getMessage());
         }
+    }
+
+
+    @RequestMapping("/user")
+    public Customer getUserDetailsAfterLogin(Authentication authentication) {
+        Optional<Customer> optionalCustomer = customerRepository.findByEmail(authentication.getName());
+        return optionalCustomer.orElse(null);
     }
 }
