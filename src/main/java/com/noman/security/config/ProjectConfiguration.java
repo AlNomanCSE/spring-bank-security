@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,6 +34,8 @@ public class ProjectConfiguration {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
         http
+                .securityContext(contextConfig->contextConfig.requireExplicitSave(false))
+                .sessionManagement(sessiConfig->sessiConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .cors(corsConfig -> corsConfig.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -49,9 +52,7 @@ public class ProjectConfiguration {
                         .csrfTokenRequestHandler(csrfHandler)
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFIlter(), BasicAuthenticationFilter.class)
-                .sessionManagement(smc -> smc.maximumSessions(3).maxSessionsPreventsLogin(true))
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())
-//                .csrf(csrfConfig -> csrfConfig.disable())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount", "/myBalance", "/myLoans", "/myCards").authenticated()
                         .requestMatchers("/notices", "/contact", "/error", "/register").permitAll());
