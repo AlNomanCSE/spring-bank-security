@@ -1,37 +1,28 @@
 # Bank Backend Application
 
-A secure banking application backend built with Spring Boot and Spring Security, providing authenticated access to banking services and public information endpoints.
+This repository contains the backend code for the Bank Backend Application, a secure and robust system built using Spring Boot and Spring Security. The frontend for this application is developed using AngularJS and can be found [here](https://github.com/AlNomanCSE/spring-bank-security-fronten-angularjs.git).
 
+## Description
 
-## Related Repositories
+The Bank Backend Application provides authenticated access to various banking services and public information endpoints. This project demonstrates the implementation of role-based access control, secure authentication mechanisms, and RESTful API endpoints for banking operations.
 
-- Bank Frontend Application: [Bank Frontend Angular]()
+## Key Features
 
-
-## Features
-
-- Secure authentication for banking services
-- Public access to notices and contact information
-- Role-based access control
-- RESTful API endpoints for various banking operations
-- Environment variable based configuration
-- Detailed security logging
+- **Secure Authentication:** Implements form-based and HTTP Basic authentication.
+- **Role-Based Access Control:** Protects endpoints for account details, cards, loans, and balance based on user roles.
+- **Public Endpoints:** Provides public access to notices and contact information.
+- **RESTful API:** Offers endpoints for various banking operations.
+- **Environment-Based Configuration:** Supports configuration through environment variables.
+- **Detailed Security Logging:** Configurable logging for security-related events.
 
 ## Technologies Used
 
-- Java
-- Spring Boot
-- Spring Security
-- Spring Web
-- Maven
-
-## Security Features
-
-- Protected endpoints for account details, cards, loans, and balance
-- Public endpoints for notices and contact information
-- Form-based authentication
-- HTTP Basic authentication support
-- Configurable security credentials through environment variables
+- **Java 21**
+- **Spring Boot**
+- **Spring Security**
+- **Spring Web**
+- **Maven**
+- **MySQL**
 
 ## Configuration
 
@@ -44,7 +35,6 @@ spring-boot-devtools
 <!-- Testing Dependencies -->
 spring-boot-starter-test
 spring-security-test 
- ```
 
 ### Application Properties
 
@@ -61,60 +51,27 @@ The application supports the following environment variables:
 - `SPRING_SECURITY_LOG_LEVEL`: Security log level (default: TRACE)
 - `LOGPATTERN_CONSOLE`: Console logging pattern with color coding
 
-
 ## Project Structure
 
-```
-com.noman.BankBackendApplication
-├── config
-│   └── ProjectSecurityConfig.java
-├── controller
-│   ├── AccountController.java
-│   ├── BalanceController.java
-│   ├── CardsController.java
-│   ├── ContactController.java
-│   ├── LoansController.java
-│   └── NoticesController.java
-└── BankBackendApplication.java
-```
-
-## Package Overview for Bank Backend Application
-
-1. **config**:
-   - Contains configuration classes for setting up security, application properties, and other configurations necessary for the application to run.
-
-2. **controller**:
-   - Houses the REST controllers that handle incoming HTTP requests and return responses. This includes endpoints for customer registration, account management, loans, and more.
-
-3. **events**:
-   - Likely contains classes related to event handling within the application, such as publishing and listening to application events.
-
-4. **exceptionhandling**:
-   - Contains classes for handling exceptions throughout the application, providing a centralized way to manage errors and return appropriate responses to clients.
-
-5. **filter**:
-   - This package likely includes filters that can intercept requests and responses, allowing for functionalities like logging, authentication, or modifying requests.
-
-6. **model**:
-   - Contains the entity classes that represent the data model of the application, such as Loans, Contact, Notice, etc. These classes are typically annotated with JPA annotations to map them to database tables.
-
-7. **repository**:
-   - Houses the repository interfaces that provide methods for data access, typically extending Spring Data JPA's JpaRepository or similar interfaces for CRUD operations.
+- **Configuration:** Contains security and application configuration classes.
+- **Controllers:** Houses REST controllers for handling HTTP requests.
+- **Models:** Defines entity classes representing the data model.
+- **Repositories:** Provides data access methods using Spring Data JPA.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Java 17 or higher
+- Java 21
 - Maven
-- IntelliJ IDEA
+- MySQL
 
 ### Installation
 
-1. Clone the repository
-```bash
-git clone <repository-url>
-```
+1. **Clone the Repository:**
+   ```bash
+   git clone <repository-url>
+   ```
 
 2. Navigate to project directory
 ```bash
@@ -145,10 +102,6 @@ mvn spring-boot:run
 - `/myAccount` - Get account details
 - `/myCards` - Get cards information
 - `/myBalance` - Check balance
-### Summary
-This README file provides a comprehensive overview of your Bank Backend Application, including its features, technologies, configuration, package structure, and instructions for getting started. 
-
-If you need any further adjustments or additional sections, just let me know!
 - `/myLoans` - Get loans information
 
 ### Public Endpoints
