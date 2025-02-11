@@ -56,8 +56,8 @@ public class ProjectConfiguration {
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())  //Only HTTP
                 .addFilterAfter(new CsrfCookieFIlter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/myAccount").authenticated()
-                        .requestMatchers("/myBalance").hasRole("SUPER_ADMIN")
+                    .requestMatchers("/myAccount").hasRole("USER")
+                        .requestMatchers("/myBalance").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/myBalance").hasAuthority("NOTHING")
                         .requestMatchers("/myLoans").hasAnyAuthority("VIEWLOAN", "VIEWACCOUNT")
                         .requestMatchers("/myCards").access(new WebExpressionAuthorizationManager("hasAnyAuthority('NOONE') || hasRole('OK')"))
