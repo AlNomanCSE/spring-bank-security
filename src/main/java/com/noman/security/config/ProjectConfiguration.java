@@ -15,6 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -59,7 +60,7 @@ public class ProjectConfiguration {
                         .requestMatchers("/myBalance").hasRole("SUPER_ADMIN")
                         .requestMatchers("/myBalance").hasAuthority("NOTHING")
                         .requestMatchers("/myLoans").hasAnyAuthority("VIEWLOAN", "VIEWACCOUNT")
-                        .requestMatchers("/myCards").hasAuthority("VIEWCARD")
+                        .requestMatchers("/myCards").access(new WebExpressionAuthorizationManager("hasAnyAuthority('NOONE') || hasRole('OK')"))
                         .requestMatchers("/user").authenticated()
                         .requestMatchers("/notices", "/contact", "/error", "/register").permitAll());
         http.formLogin(withDefaults());
