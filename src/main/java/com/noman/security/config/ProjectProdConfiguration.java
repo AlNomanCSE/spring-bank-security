@@ -40,7 +40,7 @@ public class ProjectProdConfiguration {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+                        config.setAllowedOrigins(Collections.singletonList("https://localhost:4200"));
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
@@ -52,10 +52,15 @@ public class ProjectProdConfiguration {
                         .csrfTokenRequestHandler(csrfHandler)
                         .ignoringRequestMatchers("/contact","/register")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .requiresChannel(rcc ->rcc.anyRequest().requiresSecure())  //Only HTTPS
                 .addFilterAfter(new CsrfCookieFIlter(), BasicAuthenticationFilter.class)
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/myAccount", "/myBalance", "/myLoans", "/myCards","/user").authenticated()
+                        .requestMatchers("/myAccount").authenticated()
+                        .requestMatchers( "/myBalance").hasRole("SUPER_ADMIN")
+                        .requestMatchers( "/myLoans").hasAnyAuthority("VIEWLOAN","VIEWACCOUNT")
+                        .requestMatchers(  "/myCards").hasAuthority("VIEWCARD")
+                        .requestMatchers(  "/user").authenticated()
                         .requestMatchers("/notices", "/contact", "/error", "/register").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));

@@ -52,10 +52,15 @@ public class ProjectConfiguration {
                         .csrfTokenRequestHandler(csrfHandler)
                         .ignoringRequestMatchers("/contact","/register")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .requiresChannel(rcc ->rcc.anyRequest().requiresInsecure())  //Only HTTP
                 .addFilterAfter(new CsrfCookieFIlter(), BasicAuthenticationFilter.class)
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/myAccount", "/myBalance", "/myLoans", "/myCards","/user").authenticated()
+                        .requestMatchers("/myAccount").authenticated()
+                        .requestMatchers( "/myBalance").hasRole("SUPER_ADMIN")
+                        .requestMatchers( "/myLoans").hasAnyAuthority("VIEWLOAN","VIEWACCOUNT")
+                        .requestMatchers(  "/myCards").hasAuthority("VIEWCARD")
+                        .requestMatchers(  "/user").authenticated()
                         .requestMatchers("/notices", "/contact", "/error", "/register").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
