@@ -34,8 +34,8 @@ public class ProjectProdConfiguration {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
         http
-                .securityContext(contextConfig->contextConfig.requireExplicitSave(false))
-                .sessionManagement(sessiConfig->sessiConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
+                .sessionManagement(sessiConfig -> sessiConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .cors(corsConfig -> corsConfig.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -50,17 +50,16 @@ public class ProjectProdConfiguration {
                 }))
                 .csrf(csrfConfig -> csrfConfig
                         .csrfTokenRequestHandler(csrfHandler)
-                        .ignoringRequestMatchers("/contact","/register")
+                        .ignoringRequestMatchers("/contact", "/register")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-                .requiresChannel(rcc ->rcc.anyRequest().requiresSecure())  //Only HTTPS
+                .requiresChannel(rcc -> rcc.anyRequest().requiresSecure())  //Only HTTPS
                 .addFilterAfter(new CsrfCookieFIlter(), BasicAuthenticationFilter.class)
-                .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/myAccount").authenticated()
-                        .requestMatchers( "/myBalance").hasRole("SUPER_ADMIN")
-                        .requestMatchers( "/myLoans").hasAnyAuthority("VIEWLOAN","VIEWACCOUNT")
-                        .requestMatchers(  "/myCards").hasAuthority("VIEWCARD")
-                        .requestMatchers(  "/user").authenticated()
+                        .requestMatchers("/myBalance").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/myLoans").hasAnyAuthority("VIEWLOAN", "VIEWACCOUNT")
+                        .requestMatchers("/myCards").hasAuthority("VIEWCARD")
+                        .requestMatchers("/user").authenticated()
                         .requestMatchers("/notices", "/contact", "/error", "/register").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
