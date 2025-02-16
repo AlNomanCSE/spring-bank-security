@@ -4,6 +4,8 @@ package com.noman.security.config;
 import com.noman.security.exceptionhandling.CustomBasicAccessDeniedEntryPoint;
 import com.noman.security.exceptionhandling.CustomBasicAuthenticationEntryPoint;
 import com.noman.security.filter.CsrfCookieFIlter;
+import com.noman.security.filter.JWTTokenGeneratorFilter;
+import com.noman.security.filter.JWTTokenVelidatorFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +17,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.security.web.authentication.password.HaveIBeenPwnedRestApiPasswordChecker;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -23,6 +24,7 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -35,8 +37,7 @@ public class ProjectConfiguration {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         CsrfTokenRequestAttributeHandler csrfHandler = new CsrfTokenRequestAttributeHandler();
         http
-                .securityContext(contextConfig -> contextConfig.requireExplicitSave(false))
-                .sessionManagement(sessiConfig -> sessiConfig.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(sessiConfig -> sessiConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(corsConfig -> corsConfig.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
@@ -45,6 +46,7 @@ public class ProjectConfiguration {
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
+                        config.setExposedHeaders(Arrays.asList("Authorization"));
                         config.setMaxAge(3600L);
                         return config;
                     }
@@ -55,18 +57,22 @@ public class ProjectConfiguration {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())  //Only HTTP
                 .addFilterAfter(new CsrfCookieFIlter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
+                .addFilterBefore(new JWTTokenVelidatorFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                    .requestMatchers("/myAccount").hasRole("USER")
-                        .requestMatchers("/myBalance").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/myBalance").hasAuthority("NOTHING")
-                        .requestMatchers("/myLoans").hasAnyAuthority("VIEWLOAN", "VIEWACCOUNT")
-                        .requestMatchers("/myCards").access(new WebExpressionAuthorizationManager("hasAnyAuthority('NOONE') || hasRole('OK')"))
+                    .requestMatchers("/myAccount").authenticated()
+                        .requestMatchers("/myBalance").authenticated()
+                        .requestMatchers("/myBalance").authenticated()
+                        .requestMatchers("/myLoans").authenticated()
+                        .requestMatchers("/myCards").authenticated()
                         .requestMatchers("/user").authenticated()
                         .requestMatchers("/notices", "/contact", "/error", "/register").permitAll());
         http.formLogin(withDefaults());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomBasicAccessDeniedEntryPoint()));
         return http.build();
+
+
     }
 
     @Bean

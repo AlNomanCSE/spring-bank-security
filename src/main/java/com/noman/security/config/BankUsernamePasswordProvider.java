@@ -24,8 +24,6 @@ public class BankUsernamePasswordProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, password, userDetails.getAuthorities());
-
-
     }
 
     @Override
